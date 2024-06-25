@@ -1,11 +1,23 @@
 import { promises } from 'dns';
 import { NextFunction, Request, Response } from 'express';
 import connection from '../models/connection';
+import { RowDataPacket } from 'mysql2'; 
+
+
+interface DatabaseCount {
+    database_count: number;
+}
+
+
+
+
+
+
+
+
 
 
 export class IndexController {
-
-
 
     public static async allDatabases(req: Request, res: Response): Promise<any> {
         try {
@@ -24,12 +36,17 @@ export class IndexController {
     
     public static async allTables(req: Request, res: Response){
         try {
+            const [rows] = await connection.execute<RowDataPacket[]>('SELECT COUNT(*) AS database_count FROM information_schema.SCHEMATA;');
+        
+            const result : any | number = rows[0];
 
-            const [numberDatabases] = await connection.execute('SELECT COUNT(*) AS database_count FROM information_schema.SCHEMATA;');
-            const [databases] = await connection.execute('show databases;');
-            console.log(numberDatabases.database_count);
+            const count = result.database_count;
+
+            console.log(count);
             
-            return res.status(200).json({numberDatabases});
+            return res.status(200).json({ message: "oii", count });
+
+            
         
 
         } catch (error) {
@@ -40,6 +57,8 @@ export class IndexController {
 
 
     };
+
+
 
 
 };
