@@ -19,39 +19,61 @@ interface DatabaseCount {
 
 export class IndexController {
 
+    private static databaseList: Array<string> = [];
+
+
     public static async allDatabases(req: Request, res: Response): Promise<any> {
         try {
-            const [databases] = await connection.execute('show databases;');
-            
-            const [numberDatabases] = await connection.execute('SELECT COUNT(*) AS database_count FROM information_schema.SCHEMATA;');
+            const [databases] = await connection.execute<RowDataPacket[]>('show databases;');
 
-            return res.status(200).json({databases, numberDatabases});
+            IndexController.databaseList = databases.map(db => db.Database);
+            
+            const result: Array<string> = databases.map(db => db.Database);
+            
+            const [numberDatabase]= await connection.execute('SELECT COUNT(*) AS database_count FROM information_schema.SCHEMATA;');
+
+            return res.status(200).json({result, numberDatabase});
         } catch (error) {
             console.log(error);
             
-            res.status(400).json({message : "erro interno ao se conectar com o banco de dados"});
+            res.status(500).json({message : "erro interno ao se conectar com o banco de dados"});
         }
 
     };
     
     public static async allTables(req: Request, res: Response){
-        try {
-            const [rows] = await connection.execute<RowDataPacket[]>('SELECT COUNT(*) AS database_count FROM information_schema.SCHEMATA;');
+        const query: string = "SELECT table_name FROM information_schema.tables WHERE table_schema = ?";
+
         
-            const result : any | number = rows[0];
-
-            const count = result.database_count;
-
-            console.log(count);
+        try {
+            const numData : number = parseInt(req.params.id)
             
-            return res.status(200).json({ message: "oii", count });
+            if (!IndexController.databaseList.length) {
+                const [databases] = await connection.execute<RowDataPacket[]>('show databases;');
+                IndexController.databaseList = databases.map(db => db.Database); 
+            }
+
+            if (numData > IndexController.databaseList.length) {
+                return res.status(404).json({message : "database not found"})
+            }
+            
+const [result] = await connection.execute<RowDataPacket[]>(query, [IndexController.databaseList[numData]]);
+            console.log(IndexController.databaseList[numData]);
+            
+            console.log(result);
+            
+
+            
+
+            
+            return res.status(200).json(result);
 
             
         
 
         } catch (error) {
                 console.log(error);
-                res.status(400).json({message : "erro interno ao se conectar com o banco de dados"});
+                res.status(500).json({message : "erro interno ao se conectar com o banco de dados"});
                 
         }
 
