@@ -41,10 +41,9 @@ export class IndexController {
 
     };
     
-    public static async allTables(req: Request, res: Response){
+    public static async allTables(req: Request, res: Response): Promise<any> {
         const query: string = "SELECT table_name FROM information_schema.tables WHERE table_schema = ?";
 
-        
         try {
             const numData : number = parseInt(req.params.id)
             
@@ -59,24 +58,28 @@ export class IndexController {
             
             const [result] = await connection.execute<RowDataPacket[]>(query, [IndexController.databaseList[numData]]);
             
-            
-
-            
-
-            
             return res.status(200).json(result);
-
-            
-        
 
         } catch (error) {
                 console.log(error);
-                res.status(500).json({message : "erro interno ao se conectar com o banco de dados"});
-                
+                res.status(500).json({message : "erro interno ao se conectar com o banco de dados"});    
         }
 
 
     };
+
+    public static async allElements(req: Request, res: Response): Promise<any> {
+        const dbName : string = req.params.db;
+        const tableName : string = req.params.table;
+        const query : string = "SELECT * FROM " + dbName + "." + tableName;
+        try {
+            const [result] = await connection.execute<RowDataPacket[]>(query);
+            return res.status(200).json(result);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({message : "erro interno ao se conectar com o banco de dados"});
+        }
+    }
 
 
 
