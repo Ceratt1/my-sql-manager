@@ -2,3 +2,4 @@ backend/node_modules
 test.js
 testes.sql
 backend/.env
+frontend/node_modules

@@ -1,6 +1,10 @@
 import express from 'express';
-const app = express();
+import cors from 'cors';
+
 import indexRouter  from './routes/indexRouter';
-app.use(express.json());
+const app = express();
+app.use(cors());
+
 app.use(indexRouter);
+app.use(express.json());
 export default app;

@@ -57,10 +57,8 @@ export class IndexController {
                 return res.status(404).json({message : "database not found"})
             }
             
-const [result] = await connection.execute<RowDataPacket[]>(query, [IndexController.databaseList[numData]]);
-            console.log(IndexController.databaseList[numData]);
+            const [result] = await connection.execute<RowDataPacket[]>(query, [IndexController.databaseList[numData]]);
             
-            console.log(result);
             
 
             
